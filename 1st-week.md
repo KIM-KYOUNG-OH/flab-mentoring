@@ -55,12 +55,34 @@
     - 베타 lock이 해제될 때까지 다른 트랜잭션은 해당 리소스에 접근할 수 없다
 
 ## Lock 설정 범위(Level)
-- ㅇ
+- database lock
+  - 전체 데이터베이스 lock
+  - db 소프트웨어 버전 업데이트시 사용
+- table lock
+  -  테이블 기준으로 lock
+  -  테이블 전체(모든 행)에 영향을 주는 변경시 사용
+  -  DDL(CREATE, ALTER, DROP)과 함께 사용
+- row lock
+  - 행을 기준으로 lock
+  - DML(INSERT, SELECT, UPDATE, DELETE)과 함께 사용
 
+## 블로킹(Blocking)
+- lock간 경합이 발생해서 특정 Transaction이 작업을 진행하지 못하고 멈춘 상태
+- (베타 & 베타) or (베타 & 공유) 끼리 발생
+- (공유 & 공유)는 발생하지 않음
+- 블로킹을 해소하기 위해선 commit이나 rollback으로 트랜잭션을 종료해야 한다
+- 블로킹은 성능에 좋지 않은 영향을 주므로 블로킹을 최소화해야 함
 
-- db 격리
-- DB 락
-    - table lock & row lock
+## 교착상태(DeadLock)
+- 두 트랜잭션이 각각 lock을 설정하고 서로의 리소스를 얻고자할 때(lock이 풀리길 기다림) 양쪽 트랜잭션 모두 영원히 처리되지 않게 되는 상태
+
+<img width="420" alt="스크린샷 2022-02-11 오후 12 53 22" src="https://user-images.githubusercontent.com/66231761/153535150-bdae3e93-82ac-47c7-9af0-0d317bc5e032.png">
+- Deadlock 발생시 둘 중 한 트랜잭션에 에러를 발생시킴으로써 문제를 해결한다
+- 교착상태가 발생할 가능성을 줄이기 위해 수정과 조회 연산을 동시에 수행하는 로직을 지향한다
+- 위 예시에선 update 연산이 완료되면 commit을 호출해서 테이블 접근 교차가 일어나지 않도록 한다
+
+- 트랜잭션 격리 수준
+
 - 인덱스
     - B-Tree B*-Tree
     - 클러스터 인덱스 논클러스터 인덱스
@@ -83,8 +105,9 @@
     - 같은 DB를 바라볼 때 일어나는 이슈
 - 인프런에서 slow query 인덱스로 인한 장애
 
-# 네이버 메인화면 트래픽 분산
+# 네이버 메인페이지 트래픽 분산 방법
 
 # References
 - https://spidyweb.tistory.com/164
 - https://github.com/WeareSoft/tech-interview
+- https://sabarada.tistory.com/121
