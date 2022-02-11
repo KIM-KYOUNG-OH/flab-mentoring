@@ -36,6 +36,7 @@
 
 ## 트랜잭션의 상태
 <img width="541" alt="스크린샷 2022-02-11 오후 12 15 08" src="https://user-images.githubusercontent.com/66231761/153532419-13438d9d-810e-45c1-8a75-bc0e6e717358.png">
+
 - commit
   - 현재까지의 데이터 변경사항을 영구적으로 적용하고 트랜잭션을 종료하는 명령
 - rollback
@@ -77,6 +78,7 @@
 - 두 트랜잭션이 각각 lock을 설정하고 서로의 리소스를 얻고자할 때(lock이 풀리길 기다림) 양쪽 트랜잭션 모두 영원히 처리되지 않게 되는 상태
 
 <img width="420" alt="스크린샷 2022-02-11 오후 12 53 22" src="https://user-images.githubusercontent.com/66231761/153535150-bdae3e93-82ac-47c7-9af0-0d317bc5e032.png">
+
 - Deadlock 발생시 둘 중 한 트랜잭션에 에러를 발생시킴으로써 문제를 해결한다
 - 교착상태가 발생할 가능성을 줄이기 위해 수정과 조회 연산을 동시에 수행하는 로직을 지향한다
 - 위 예시에선 update 연산이 완료되면 commit을 호출해서 테이블 접근 교차가 일어나지 않도록 한다
@@ -92,15 +94,16 @@
 
 1. Read Uncommitted(level 0)
 <img width="550" alt="스크린샷 2022-02-11 오후 7 43 45" src="https://user-images.githubusercontent.com/66231761/153577966-59787116-c602-45ca-a2b0-d4eceb0c209f.png">
+
 - 트랜잭션 처리중에 아직 커밋되지 않은 데이터를 다른 트랜잭션이 읽는 것을 허용한다
 - Dirty Read, Non-Repeatable Read, Phantom Read 현상이 발생한다
   - Dirty Read
     - 트랜잭션A가 수정중인데 외부에서 트랜잭션B가 A의 데이터를 조회하는 것
-  - 
 - 데이터 정합성을 보장하지 못해 RDBMS 표준에서는 격리 수준으로 인정하지 않는다
 
 2. Read Committed(level 1)
 <img width="550" alt="스크린샷 2022-02-11 오후 7 48 17" src="https://user-images.githubusercontent.com/66231761/153578517-e7fa91dd-cc2e-413b-bfd7-e6055dcff168.png">
+
 - 실제 테이블 값을 가져오는 것이 아니라 Undo 영역에 백업된 레코드(커밋되서 더이상 변경되지 않을 값)에서 값을 가져온다
 - 실제 온라인 서비스와 표준 RDB에서 기본적으로 사용되고 있는 격리 수준
 - Dirty Read를 회피할 수 있다
@@ -110,6 +113,7 @@
 
 3. Repeatable Read(level 2)
 <img width="550" alt="스크린샷 2022-02-11 오후 7 57 15" src="https://user-images.githubusercontent.com/66231761/153579952-1e86e543-7c45-4bfd-8f92-dbe8b9ae8835.png">
+
 - 트랜잭션마다 ID를 부여하여 트랜잭션 ID보다 작은 트랜잭션 번호에서 변경한 것만 읽게 된다
 - 변경되기 전 레코드는 Undo 공간에 백업해두고 실제 값을 변경한다
 - Non-Repeatable Read는 회피할 수 있지만 Update 부정합과 Phantom Read가 발생할 수 있다
@@ -118,6 +122,10 @@
 4. Serializable(level 3)
 - 선행 트랜잭션에 공유 Lock을 걸어 다른 트랜잭션에서 insert, update, delete 작업을 못하게 막는다
 - 동시성이 저하되지만 성능 저하가 일어남
+
+
+
+
 
 - 인덱스
   - B-Tree B*-Tree
@@ -139,7 +147,7 @@
     - 하나의 어플리케이션내에서 (스레드끼리 동시성 이슈) 처리방법
     - 서로다른 어플리케이션에서 (프로세스 끼리 동시성 이슈) 처리 방법
     - 같은 DB를 바라볼 때 일어나는 이슈
-- 인프런 slow query 인덱스로 인한 장애
+- slow query 인덱스로 인한 인프런 장애 사례
 
 # 네이버 메인페이지 트래픽 분산 방법
 
