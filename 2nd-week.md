@@ -153,24 +153,51 @@
 
 # HashTable vs ConcurrentHashMap
 
+<img width="500" src="https://user-images.githubusercontent.com/66231761/154831919-5145e221-4799-4c79-9333-cfa1b09c7cb9.png">  
+
 - HashTable
     - map 읽기/쓰기 작업에 lock을 건다
     - lock이 걸린상태에서 다른 스레드가 접근하면 ConcurrentModificationException 발생
     - Enumerator로 출력
+
+<img width="500" src="https://user-images.githubusercontent.com/66231761/154831947-1f14df13-99c6-4f5d-919d-c9ae21600dd5.png">  
+
 - ConcurrentHashMap
     - map을 여러 세그먼트로 나누고 map 전체가 아닌 segment에 lock을 거는 방식
-    - Iterator로 출력
-    - concurrencyLevel = 16
-        - default 세그먼트 수
-        - 쓰기 스레드와 동시에 수용가능한 수
+        - 같은 세그먼트에 동시에 쓰기 스레드가 일어나지 않는 이상 에러가 발생하지 않음
+    - Fail-safe Iterator로 출력
+        - db의 undo log처럼 copy된 데이터를 출력하는 방식
+        - HashMap은 Fast-Fail Iterator로 출력하므로 멀티스레드 환경에서 ConcurrencyModificationException 발생
+    - 생성자 인자
+        - concurrencyLevel = 16
+            - default 세그먼트 수
+            - 동시에 사용 가능한 쓰기 스레드 수
+        - loadFactory = 0.75f
+            - resizing 하는 시점(75% 일때 동작)
+        - initial Capacity = 10
+            - 초기 Entry 적재 용량
     - key 또는 value에 null값을 허용하지 않음
-    - loadFactory = 0.75f
-        - resizing 하는 시점(75% 일때 동작)
-    - initial Capacity = 10
-        - 초기 Entry 적재 용량
+
+# 왜 ConcurrentHashMap은 null 값을 허용하지 않을까?
+
+- get(key) 값이 null일 때 두 가지 해석이 존재하는 애매모호함을 없애기 위함이다
+    - key 값에 value 값이 mapping 되지 않았다(absent)
+    - key 값에 value 값으로 null 값이 mapping 되었다(initialize null)
+
+```java
+if (map.contains(key)) {
+    return map.get(key);
+} else {
+    throw new KeyNotFoundException;
+}
+```
+
+- 멀티스레드 환경에서 containsKey(key)와 get(key) 사이에 수정이 일어난다면, KeyNotFoundException이 발생해야하지만 null을 반환해버린다
 
 # Reference
 
 - [https://jeong-pro.tistory.com/148](https://jeong-pro.tistory.com/148)
 - [https://beststar-1.tistory.com/15](https://beststar-1.tistory.com/15)
 - [https://www.geeksforgeeks.org/how-does-concurrenthashmap-achieve-thread-safety-in-java/](https://www.geeksforgeeks.org/how-does-concurrenthashmap-achieve-thread-safety-in-java/)
+- [https://javahungry.blogspot.com/2015/02/how-concurrenthashmap-works-in-java-internal-implementation.html](https://javahungry.blogspot.com/2015/02/how-concurrenthashmap-works-in-java-internal-implementation.html)
+- [https://www.javainuse.com/java/javaConcurrentHashMap](https://www.javainuse.com/java/javaConcurrentHashMap)
